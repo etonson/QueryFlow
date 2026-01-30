@@ -16,7 +16,17 @@ public class Employee {
     private int id;
     private int departmentId;
     private int salary;
+    private String name;
 
+    /**
+     * 簡易建構子（向後相容）
+     */
+    public Employee(int id, int departmentId, int salary) {
+        this.id = id;
+        this.departmentId = departmentId;
+        this.salary = salary;
+        this.name = null;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -25,12 +35,13 @@ public class Employee {
         Employee employee = (Employee) o;
         return id == employee.id &&
                 departmentId == employee.departmentId &&
-                salary == employee.salary;
+                salary == employee.salary &&
+                java.util.Objects.equals(name, employee.name);
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(id, departmentId, salary);
+        return java.util.Objects.hash(id, departmentId, salary, name);
     }
 }
 

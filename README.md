@@ -84,6 +84,64 @@ result.print();
 ### `.where(Predicate<T> predicate)`
 過濾資料，相當於 SQL 的 `WHERE` 子句。只有滿足條件的元素才會進入下一步。
 
+#### 邏輯運算子
+
+QueryFlow 提供了多種邏輯運算子來構建複雜的查詢條件：
+
+| 方法 | 說明 | 範例 |
+|------|------|------|
+| `and(predicates...)` | AND 邏輯（所有條件都為真） | `and(e -> e.getSalary() > 50000, e -> e.getDeptId() == 10)` |
+| `or(predicates...)` | OR 邏輯（任一條件為真） | `or(e -> e.getSalary() > 80000, e -> e.getId() == 1)` |
+| `in(extractor, values...)` | 欄位值在給定值中 | `in(Employee::getDeptId, 10, 20)` |
+| `notIn(extractor, values...)` | 欄位值不在給定值中 | `notIn(Employee::getId, 1, 3)` |
+| `eq(extractor, value)` | 欄位值等於給定值 | `eq(Employee::getName, "Alice")` |
+| `neq(extractor, value)` | 欄位值不等於給定值 | `neq(Employee::getName, "Bob")` |
+
+#### 通配符匹配（Wildcard Matching）
+
+`in`、`notIn`、`eq`、`neq` 方法對於 **String 類型** 的欄位支援通配符模式：
+
+| 模式 | 說明 | 範例 |
+|------|------|------|
+| `A*` | 前綴匹配（以 A 開頭） | `eq(Employee::getName, "A*")` 匹配 Alice、Alex、Anna |
+| `*A` | 後綴匹配（以 A 結尾） | `in(Employee::getName, "*a")` 匹配 Anna |
+| `*A*` | 包含匹配（包含 A） | `eq(Employee::getName, "*li*")` 匹配 Alice、Charlie |
+| `A` | 精確匹配 | `eq(Employee::getName, "Alice")` 只匹配 Alice |
+
+**通配符使用範例：**
+
+```java
+// 查找名字以 "A" 開頭的員工
+LiteQuery.from(employees)
+    .where(in(Employee::getName, "A*"))
+    .select(col("Name", Employee::getName))
+    .execute();
+
+// 查找名字以 "son" 結尾的員工
+LiteQuery.from(employees)
+    .where(eq(Employee::getName, "*son"))
+    .select(col("Name", Employee::getName))
+    .execute();
+
+// 查找名字包含 "li" 的員工
+LiteQuery.from(employees)
+    .where(in(Employee::getName, "*li*"))
+    .select(col("Name", Employee::getName))
+    .execute();
+
+// 查找名字不以 "A" 開頭的員工
+LiteQuery.from(employees)
+    .where(notIn(Employee::getName, "A*"))
+    .select(col("Name", Employee::getName))
+    .execute();
+
+// 混合使用：名字以 "A" 開頭 或 以 "b" 結尾
+LiteQuery.from(employees)
+    .where(in(Employee::getName, "A*", "*b"))
+    .select(col("Name", Employee::getName))
+    .execute();
+```
+
 ### `.groupBy(Function<T, ?> keySelector)`
 分組資料，相當于 SQL 的 `GROUP BY` 子句。傳入一個函式來指定分組的鍵。
 
