@@ -1,4 +1,4 @@
-package com.litequery.example;
+package demo.context;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
